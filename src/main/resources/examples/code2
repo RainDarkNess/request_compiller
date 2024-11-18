@@ -1,0 +1,29 @@
+begin var
+int, int1, int2, int1111 #;
+
+int1111 as 1;
+
+if int GRT 2 then{
+    int as 2;
+}
+else{
+    int as 12;
+}
+
+int as int add 11;
+int as int del 12;
+int as int umn 12;
+int as int del 12;
+
+while int LOWT 1 do{
+    int as 122;
+}
+
+for # i as 1 to 10 do{
+    int as int add 1;
+}
+
+read(int);
+write(int);
+
+ends

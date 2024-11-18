@@ -1,0 +1,13 @@
+begin var
+int, int1, int2, int1111 #;
+
+int1111 as 1;
+int as 1;
+if int EQV 2 then{
+    int as 2;
+}
+else{
+    int as 12;
+}
+
+end
