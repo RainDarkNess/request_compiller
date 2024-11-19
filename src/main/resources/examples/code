@@ -2,12 +2,19 @@ begin var
 int, int1, int2, int1111 #;
 
 int1111 as 1;
-int as 1;
+int as int1111;
 if int EQV 2 then{
     int as 2;
 }
 else{
     int as 12;
 }
+while int LOWT 1 do{
+    int as int;
+}
 
-end
+for i as 1 to 10 do{
+    int as int add 1;
+}
+
+end.
