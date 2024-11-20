@@ -1,10 +1,13 @@
 package org.compiler;
 
+import org.compiler.instrument.CustomException;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import static org.compiler.instrument.DelimiterWordHelp.readDelimitersWords;
+import static org.compiler.instrument.DigitCheck.convertValue;
 
 public class Lexer {
 
@@ -45,6 +48,10 @@ public class Lexer {
                                 writer.append("4,");
                                 writer.append(String.valueOf(value_count)).append(";");
                                 System.out.println("VALUE 4,"+value_count+" v:"+buffer);
+                                buffer = new StringBuilder(convertValue(String.valueOf(buffer)));
+                                if(buffer.toString().equals("false_verification")){
+                                    throw new CustomException("Неверно введеное число");
+                                }
                                 table_vars.add(String.valueOf(buffer));
                                 value_count++;
                             }else{
@@ -93,7 +100,9 @@ public class Lexer {
 
                 }
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {} catch (CustomException e) {
+            throw new RuntimeException(e);
+        }
         writer.close();
         result.add(table_vars);
         result.add(table_values);

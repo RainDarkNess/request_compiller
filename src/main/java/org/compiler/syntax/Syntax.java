@@ -48,6 +48,7 @@ public class Syntax {
 
     // For booleans
     boolean isFor = false;
+    boolean forDone = false;
     boolean variableCreation = false;
     String variableIdTmp = "";
     boolean asDetect = false;
@@ -75,6 +76,7 @@ public class Syntax {
                 continue;
             }
         }
+        int a =1;
     }
     public String writeMessageByBuffer(String buffer){
         int tableNum = Integer.parseInt(buffer.split(",")[0]);
@@ -104,11 +106,20 @@ public class Syntax {
                         String var_tmp_name = tableForAll.get(1).get(Integer.parseInt(buffer.split(",")[1])).toString();
                         for(Variable _variable_ : variables){
                             if(Objects.equals(_variable_.name, var_tmp_name)){
-                                variable.value = _variable_.value;
+                                if(Objects.equals(variable.type, _variable_.type)){
+                                    variable.value = _variable_.value;
+                                }else{
+                                    throw new CustomException("Ошибка! У переменных разные типы данных" +  variable.value + " и " +_variable_.value);
+                                }
                             }
                         }
                     }else if(tableNum == 4){
-                        variable.value = Integer.parseInt((String) tableForAll.get(0).get(Integer.parseInt(buffer.split(",")[1])));
+                        String type = valueCheck(tableForAll.get(0).get(Integer.parseInt(buffer.split(",")[1])).toString());
+                        if(Objects.equals(type, variable.type)){
+                            variable.value = ((String) tableForAll.get(0).get(Integer.parseInt(buffer.split(",")[1])));
+                        }else{
+                            throw new CustomException("Ошибка! У значения и переменной разные типы данных " +  variable.type + " и " +type);
+                        }
                     }
                     variable.init = true;
                     debug.show("Переменной " + String.valueOf(var) + " присвоено значение " + variable.value);
@@ -146,10 +157,50 @@ public class Syntax {
         }
         return false;
     }
-    public boolean valueCheck(String buffer){
-        debug.show("Найдено значение: " + writeMessageByBuffer(buffer));
+    public String valueCheck(String buffer){
+            String typeData = "18"; // int
 
-        return true;
+            if (buffer.equals("true") || buffer.equals("false")) {
+                typeData = "20"; // bool
+                return typeData;
+            }
+
+            double test = 0.0;
+
+            if (buffer.length() >= 19) {
+                try {
+                    test = ieee754ToDouble(Long.parseUnsignedLong(buffer));
+                    String testValue = String.format("%f", test);
+                    boolean hasDot = false;
+
+                            System.out.printf("Double detected: %f%n", test);
+
+                    for (int i = 0; i < testValue.length(); i++) {
+                        if (hasDot) {
+                            if (testValue.charAt(i) != '0') {
+                                return "19"; // float
+                            }
+                        }
+                        if (testValue.charAt(i) == ',') {
+                            hasDot = true;
+                        }
+                    }
+                    return "18"; // int
+                } catch (NumberFormatException e) {
+                    // Обработка ошибки преобразования
+                    return typeData;
+                }
+            }
+
+            if (buffer.equals("true") || buffer.equals("false")) {
+                return "20";
+            }
+
+            return typeData;
+        }
+
+        private static double ieee754ToDouble(long value) {
+            return Double.longBitsToDouble(value);
     }
 
     public void condition(String buffer) throws CustomException {
@@ -160,7 +211,8 @@ public class Syntax {
             if(tableNum == 3){
                 valid = varCheck(buffer);
             }else if(tableNum == 4){
-                valid = valueCheck(buffer);
+//                valid = valueCheck(buffer);
+                valid = true;
             }
             if(!valid){
                 throw new CustomException("Неожиданный символ или переменная не объявлена " + writeMessageByBuffer(buffer));
@@ -185,8 +237,8 @@ public class Syntax {
         Variable variable = new Variable();
         variable.name = tableForAll.get(1).get(Integer.parseInt(buffer.split(",")[1])).toString();
         variable.init = true;
-        variable.value = 0;
-        variable.type = 0;
+        variable.value = "0";
+        variable.type = "";
         variables.add(variable);
     }
 
@@ -196,10 +248,12 @@ public class Syntax {
         if(toDetect){
             if (tableNum == 3) {
                 debug.show("Найдена переменная в for для to: " + writeMessageByBuffer(buffer));
+                forDone = true;
                 varCheck(buffer);
                 return;
             }else if(tableNum == 4){
                 debug.show("Найдено значение в for для to: " + writeMessageByBuffer(buffer));
+                forDone = true;
                 valueCheck(buffer);
                 return;
             }
@@ -337,10 +391,18 @@ public class Syntax {
 
         if (Objects.equals(buffer, "1,6")) {
             if(chkOperator){
-                throw new CustomException("Ошибка! Неверное условие в while." + writeMessageByBuffer(buffer));
+                throw new CustomException("Ошибка! Неверное условие в цикле." + writeMessageByBuffer(buffer));
             }
             doDetect = true;
-            debug.show("Найден do. Тело while начинается");
+            if(isFor) {
+                if (forDone) {
+                    debug.show("Найден do. Тело while начинается");
+                    forDone = false;
+                } else {
+                    throw new CustomException("Ошибка! Неверное условие в цикле." + writeMessageByBuffer(buffer));
+                }
+            }
+
             isWhile = false;
             chkVar = false;
         }
@@ -399,8 +461,8 @@ public class Syntax {
                     }
                     Variable var_add = new Variable();
                     var_add.name = String.valueOf(var);
-                    var_add.value = 0;
-                    var_add.type = Integer.parseInt(buffer.split(",")[1]);
+                    var_add.value = "0";
+                    var_add.type = buffer.split(",")[1];
                     var_add.init = false;
                     variables.add(var_add);
                 }
