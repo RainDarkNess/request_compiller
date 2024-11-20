@@ -6,9 +6,12 @@ import org.compiler.instrument.CustomException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 import static org.compiler.instrument.DelimiterWordHelp.readDelimitersWords;
+import static org.compiler.instrument.FileCreator.clearFile;
+import static org.compiler.instrument.FileCreator.createFileWithString;
 
 public class Syntax {
     static String words = "";
@@ -76,7 +79,13 @@ public class Syntax {
                 continue;
             }
         }
-        int a =1;
+        clearFile("./varibles");
+        for(Variable var: variables){
+            createFileWithString("./varibles", var.name);
+            createFileWithString("./varibles", ";");
+            createFileWithString("./varibles", var.value);
+            createFileWithString("./varibles", ";");
+        }
     }
     public String writeMessageByBuffer(String buffer){
         int tableNum = Integer.parseInt(buffer.split(",")[0]);

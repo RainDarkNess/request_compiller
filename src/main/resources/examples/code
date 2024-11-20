@@ -2,7 +2,7 @@ begin var
 int, int1, int2, int1111 #;
 
 int1111 as 130.0;
-int as int1111;
+int as int1111 add 1;
 if int EQV 2 then{
     int as 2h;
 }
