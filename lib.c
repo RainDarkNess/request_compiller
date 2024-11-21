@@ -49,8 +49,8 @@ char words[4][1024][1024] = {{
                               {"LOWE"},// 4
                                {"GRT"},// 5
                                {"GRE"},//  6
-                               {"umn"},//7
-                               {"del"},// 8
+                               {"*"},//7 umn
+                               {"/"},// 8 del
                                {"&&"},// 9
                                {"("},// 10
                                {")"},// 11
@@ -1408,32 +1408,64 @@ int read_def_vars(const char *filename) {
     char line[1000];
     fgets(line, sizeof(line), file);
 
-    bool on_off = true;
+    int on_off = 0;
     char* token = strtok(line, ";");
     char buffer[1024];
     memset(buffer, '\0', 1024);
     int index_buffer = 0;
-    int index_words = 0;
-    int index_values = 0;
+
     while (token != NULL) {
-//        printf("token %s\n", token);
-        if(on_off){
+        if(on_off == 0){
             strcpy(def_vars[count].name, token);
-//            printf("buffer name %s\n", token);
-            strcpy(words[2][index_words++], token);
-        }else{
+            on_off++;
+        }else if(on_off == 1){
             strcpy(def_vars[count].value, token);
-            def_vars[count].type[0] = ' ';
+            on_off++;
+        }else if(on_off == 2){
+            strcpy(def_vars[count].type, token);
             def_vars[count].isNull = false;
-//            printf("buffer value %s\n", token);
-            strcpy(words[3][index_values++], token);
+            on_off = 0;
             count++;
         }
-        on_off = !on_off;
         token = strtok(NULL, ";");
     }
 
     fclose(file);
+
+    FILE *file_2 = fopen("./ind", "r");
+    if (file == NULL) {
+        perror("Ошибка открытия файла");
+        return -1;
+    }
+
+    int index_words = 0;
+    char line_2[1000];
+    fgets(line_2, sizeof(line_2), file_2);
+
+    token = strtok(line_2, ";");
+    while (token != NULL) {
+        strcpy(words[2][index_words++], token);
+        token = strtok(NULL, ";");
+    }
+    fclose(file_2);
+
+    FILE *file_3 = fopen("./values", "r");
+    if (file == NULL) {
+        perror("Ошибка открытия файла");
+        return -1;
+    }
+
+    int index_values = 0;
+    char line_3[1000];
+    fgets(line_3, sizeof(line_3), file_3);
+
+    token = strtok(line_3, ";");
+    while (token != NULL) {
+        strcpy(words[3][index_values++], token);
+        token = strtok(NULL, ";");
+    }
+    fclose(file_3);
+
     return count;
 }
 
@@ -1570,8 +1602,8 @@ int main() {
             memset(buffer[0], '\0', sizeof(buffer[0]));
             memset(buffer[1], '\0', sizeof(buffer[1]));
 
-            //                  {                           begin                       var
-            if(strcmp(tokens, "2,22")==0 || strcmp(tokens, "1,1")==0 || strcmp(tokens, "1,2")==0){
+            //                   {                         begin                       var
+            if(strcmp(tokens, "2,21")==0 || strcmp(tokens, "1,1")==0 || strcmp(tokens, "1,2")==0){
                 tokens = strtok(NULL, ";");
             }
 //            printf("tokens %s\n", tokens);
@@ -1746,14 +1778,14 @@ int main() {
                 }else{
                     int true_value = 0;
                     if(strcmp(buffer[0], "3") ==0 || strcmp(buffer[0], "4") ==0){
-                        true_value = atoi(buffer[1]);
+                        true_value = atoi(buffer[1])-0;
                     }else{
                         true_value = atoi(buffer[1])-1;
                     }
                     strcat(infix, words[atoi(buffer[0])-1][true_value]);
-                    printf("infizzzz: %s\n",infix);
-                    printf("buffer[0]: %d\n",atoi(buffer[0])-1);
-                    printf("buffer[1]: %d\n",true_value);
+//                    printf("infizzzz: %s\n",infix);
+//                    printf("buffer[0]: %d\n",atoi(buffer[0])-1);
+//                    printf("buffer[1]: %d\n",true_value);
                 }
 
 
@@ -1771,8 +1803,9 @@ int main() {
                 memset(postfix, '\0', sizeof(postfix));
             }
             //                   if                             for                         while
-            if (strcmp(tokens, "1,3") == 0 || strcmp(tokens, "1,13") == 0 || strcmp(tokens, "1,11") == 0) {
+            if (strcmp(tokens, "1,4") == 0 || strcmp(tokens, "1,13") == 0 || strcmp(tokens, "1,5") == 0) {
                 has_oper = true;
+                printf("if detect\n");
                 //                  for
                 if(strcmp(tokens, "1,13") == 0)
                     cycle_for = true;
@@ -1786,7 +1819,7 @@ int main() {
             //                      end                             next
             if(!cycle_for) {
                 char hex[10]; //      }                             }
-                if (strcmp(tokens, "2,23") == 0 || strcmp(tokens, "2,23") == 0) {
+                if (strcmp(tokens, "2,22") == 0 || strcmp(tokens, "2,22") == 0) {
 
                     if(cycle_while){
                         code_align+=5;
@@ -1794,7 +1827,6 @@ int main() {
                         relocation_count = machine_templates("jmp", 0x00, index_vars, relocation_count);
                         memset(hex, '\0', 10);
                         sprintf(hex,"%d", local_relocation);
-
                         write_bytes_to_file_position(TEMP_OBJ_FILE_NAME, getFileSize(TEMP_OBJ_FILE_NAME), hex, 4);
 
                         cycle_while = false;
@@ -1831,30 +1863,31 @@ int main() {
 
             if(has_oper){
                 get_buffer_from_token(tokens, buffer[0], buffer[1]);
-                //                   then                          do
+                //             then   }          do                }
                 if((strcmp(tokens, "1,12")==0 || strcmp(tokens, "1,6")==0) && !cycle_for){ // THEN OR DO
+//                if((strcmp(tokens, "2,21")==0 || strcmp(tokens, "2,21")==0) && !cycle_for){ // {
                     if(not_flag == 1){
                         relocation_count = machine_templates("not_rbx", 0x00, index_vars, relocation_count);
                     }
                     relocation_count = machine_templates("cmp_rbx_rax", 0x00, index_vars, relocation_count);
                     if(cmp_flag!=0) {
                         switch (cmp_flag) {
-                            case 27: // ==
+                            case 2: // ==
                                 relocation_count = machine_templates("je", 0x00, index_vars, relocation_count);
                                 break;
-                            case 26: // !=
+                            case 1: // !=
                                 relocation_count = machine_templates("jne", 0x00, index_vars, relocation_count);
                                 break;
-                            case 29: // >=
+                            case 6: // >=
                                 relocation_count = machine_templates("jge", 0x00, index_vars, relocation_count);
                                 break;
-                            case 28: // =<
+                            case 4: // =<
                                 relocation_count = machine_templates("jle", 0x00, index_vars, relocation_count);
                                 break;
-                            case 4:  // <
+                            case 3:  // <
                                 relocation_count = machine_templates("jl", 0x00, index_vars, relocation_count);
                                 break;
-                            case 2:  // >
+                            case 5:  // >
                                 relocation_count = machine_templates("jg", 0x00, index_vars, relocation_count);
                                 break;
                         }
@@ -1876,31 +1909,32 @@ int main() {
                     has_oper = false;
                 }
                 if(!cycle_for) {
-                        if (strcmp(buffer[0], "3") == 0 || strcmp(buffer[0], "2") == 0) {
+                        if (strcmp(buffer[0], "4") == 0 || strcmp(buffer[0], "3") == 0) {
                             if(!has_next) {
-                                relocation_count = machine_templates("mov_addr_rax", words[atoi(buffer[0])][atoi(buffer[1])], index_vars, relocation_count);
+                                relocation_count = machine_templates("mov_addr_rax", words[atoi(buffer[0])-1][atoi(buffer[1])], index_vars, relocation_count);
                                 has_next = true;
                             }else{
-                                relocation_count = machine_templates("mov_addr_rbx", words[atoi(buffer[0])][atoi(buffer[1])], index_vars, relocation_count);
+                                relocation_count = machine_templates("mov_addr_rbx", words[atoi(buffer[0])-1][atoi(buffer[1])], index_vars, relocation_count);
                                 has_next = false;
                             }
-                        }else if(strcmp(buffer[0], "1") == 0 && strcmp(buffer[1], "35") != 0){
+                        }else if(strcmp(buffer[0], "2") == 0 && strcmp(buffer[1], "35") != 0){
                             cmp_flag = atoi(buffer[1]);
+                            printf("cmp flag %d\n", cmp_flag);
                         }else if(strcmp(buffer[0], "1") == 0 && strcmp(buffer[1], "35") == 0){
                             not_flag = 1;
                         }
 //                    }
                 }else{
                     //                   to
-                    if (strcmp(tokens, "1,7") == 0) { // DETECT VAL
+                    if (strcmp(tokens, "1,7") == 0) { // DETECT to
 
                         tokens = strtok(NULL, ";");
                         get_buffer_from_token(tokens, buffer[0], buffer[1]);
 
                         temporary_code_size = getFileSize(TEMP_OBJ_FILE_NAME);
 
-                        if (strcmp(buffer[0], "3") == 0 || (strcmp(buffer[0], "2") == 0)) {
-                            relocation_count = machine_templates("mov_addr_rbp", words[atoi(buffer[0])][atoi(buffer[1])], index_vars, relocation_count);
+                        if (strcmp(buffer[0], "4") == 0 || (strcmp(buffer[0], "3") == 0)) {
+                            relocation_count = machine_templates("mov_addr_rbp", words[atoi(buffer[0])-1][atoi(buffer[1])], index_vars, relocation_count);
                         }
 
 
@@ -1913,7 +1947,7 @@ int main() {
                         relocation_count = machine_templates("mov_rax_addr", variable, index_vars, relocation_count);
 
                     }//                   }
-                    if (strcmp(tokens, "2,23") == 0) { // DETECT NEXT
+                    if (strcmp(tokens, "2,22") == 0) { // DETECT NEXT
 
                         relocation_count = machine_templates("cmp_addr_rbp", variable_for, index_vars, relocation_count);
                         relocation_count = machine_templates("jle", 0x00, index_vars, relocation_count);
@@ -1934,7 +1968,7 @@ int main() {
                 }
             }
         //               display func
-        if(strcmp(tokens, "1,34")==0){
+        if(strcmp(tokens, "1,11")==0){
             has_displ = true;
         }
         //                  ;
@@ -1944,22 +1978,31 @@ int main() {
         if(has_displ){
             bool valid = false;
             get_buffer_from_token(tokens, buffer[0], buffer[1]);
-            if(strcmp(buffer[0], "3") == 0){
-                valid = true;
-                relocation_count = machine_templates("mov_addr_rdx", words[atoi(buffer[0])][atoi(buffer[1])], index_vars, relocation_count);
 
-            }else if(strcmp(buffer[0], "2") == 0){
+            int true_value = 0;
+            if(strcmp(buffer[0], "3") ==0 || strcmp(buffer[0], "4") ==0){
+                true_value = atoi(buffer[1])-0;
+            }else{
+                true_value = atoi(buffer[1])-1;
+            }
+
+            if(strcmp(buffer[0], "4") == 0){
                 valid = true;
-                relocation_count = machine_templates("mov_addr_rdx", words[atoi(buffer[0])][atoi(buffer[1])], index_vars, relocation_count);
+                relocation_count = machine_templates("mov_addr_rdx", words[atoi(buffer[0])-1][true_value], index_vars, relocation_count);
+
+            }else if(strcmp(buffer[0], "3") == 0){
+                valid = true;
+                relocation_count = machine_templates("mov_addr_rdx", words[atoi(buffer[0])-1][true_value], index_vars, relocation_count);
             }
             if(valid) {
                 relocation_count = machine_templates("mov_addr_rcx", "0", 0, relocation_count);
+
                 for(int variable_format = 0; variable_format < index_vars; variable_format++){
-                    if(strcmp(def_vars[variable_format].name, words[atoi(buffer[0])][atoi(buffer[1])])==0){
-                        if(strcmp(def_vars[variable_format].type, "float")==0){
+                    if(strcmp(def_vars[variable_format].name, words[2][true_value])==0){
+                        if(strcmp(def_vars[variable_format].type, "19")==0){ // @ -> float
                             relocation_count = machine_templates("lea_addr_double", 0x00, index_vars, relocation_count);
-                        }else if(strcmp(def_vars[variable_format].type, "bool")==0){
-                            relocation_count = machine_templates("lea_addr_bool", words[atoi(buffer[0])][atoi(buffer[1])], index_vars, relocation_count);
+                        }else if(strcmp(def_vars[variable_format].type, "20")==0){ // & -> bool
+                            relocation_count = machine_templates("lea_addr_bool", words[atoi(buffer[0])-1][true_value], index_vars, relocation_count);
                         }else{
                             relocation_count = machine_templates("lea_addr_int", 0x00, index_vars, relocation_count);
                         }

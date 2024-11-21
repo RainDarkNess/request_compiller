@@ -1,20 +1,25 @@
 begin var
 int, int1, int2, int1111 #;
 
-int1111 as 130.0;
-int as int1111 add 1;
+
+int as 111;
+write int;
 if int EQV 2 then{
-    int as 2h;
+    int as 2h add 1;
+    write int;
 }
 else{
-    int as 12;
+    int as 12 add 1;
+    write int;
 }
-while int LOWT 1 do{
-    int as int;
+
+while int LOWT 111 do{
+    int as int add 1;
+    write int;
 }
 
 for i as 1 to 10 do{
-    int as int add 1;
+    write i;
 }
-
+write 1111;
 end.

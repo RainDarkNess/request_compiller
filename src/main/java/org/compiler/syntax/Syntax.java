@@ -85,7 +85,20 @@ public class Syntax {
             createFileWithString("./varibles", ";");
             createFileWithString("./varibles", var.value);
             createFileWithString("./varibles", ";");
+            createFileWithString("./varibles", var.type);
+            createFileWithString("./varibles", ";");
         }
+        clearFile("./values");
+        for(int i = 0; i < tableForAll.get(0).size(); i++){
+            createFileWithString("./values", (String) tableForAll.get(0).get(i));
+            createFileWithString("./values", ";");
+        }
+        clearFile("./ind");
+        for(int i = 0; i < tableForAll.get(1).size(); i++){
+            createFileWithString("./ind", (String) tableForAll.get(1).get(i));
+            createFileWithString("./ind", ";");
+        }
+
     }
     public String writeMessageByBuffer(String buffer){
         int tableNum = Integer.parseInt(buffer.split(",")[0]);
