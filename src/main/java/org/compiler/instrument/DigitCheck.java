@@ -1,5 +1,7 @@
 package org.compiler.instrument;
 
+import java.util.Objects;
+
 public class DigitCheck {
     private static final char[] LATIN_HEX_ALPHABET = {'A', 'B', 'C', 'D', 'E', 'F', 'a', 'b', 'c', 'd', 'e', 'f', 'x'};
 
@@ -13,6 +15,13 @@ public class DigitCheck {
         boolean isDec = false;
         boolean valid = true;
         boolean isReal = false;
+
+        if(Objects.equals(value, "false")){
+            return "-1";
+        }
+        if(Objects.equals(value, "true")){
+            return "0";
+        }
 
         StringBuilder tmpValue = new StringBuilder();
         int strLenValue = (!Character.isDigit(value.charAt(value.length() - 1)) && value.length() > 1) ? value.length() - 1 : value.length();

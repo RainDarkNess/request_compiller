@@ -1333,7 +1333,7 @@ int machine_templates(char *op, char *value, int index_vars, int relocation_coun
         add_relocations_section(relocationEntry);
         relocation_count++;
     }
-    if(debug)printf("COMMAND %s, VALUE/ADDR: %s\n", op, value);
+    if(debug)printf("Комманда ассемблера %s, значение преехода в регистр: %s\n", op, value);
     return relocation_count;
 }
 
@@ -2272,5 +2272,19 @@ int main() {
 
     fclose(fopen("asm.s", "w"));
     file_write("asm.s", result);
+
+    printf("\nИдентификаторы:\n\n");
+    for(int var = 0; var < index_vars; var++){
+        printf("Номер идентификатора: %d\nИдентификатор: %s\nЗначение: %llx\nадрес: %x\n\n", var, hex_values_l[var].name, hex_values_l[var].value, hex_values_l[var].addr);
+    }
+
+    for(int tb = 0; tb < 13; tb++){
+        printf("Номер числа: %d Значение: '%s'\n", tb, words[0][tb]);
+    }
+    printf("\nDELIMITERS:\n\n");
+    for(int tb = 0; tb < 25; tb++){
+        printf("Номер разделителя: %d Значение: '%s'\n", tb, words[1][tb]);
+    }
+
     return true;
 }

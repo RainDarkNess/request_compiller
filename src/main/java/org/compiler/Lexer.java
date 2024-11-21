@@ -83,10 +83,10 @@ public class Lexer {
                     if((char) character == ';' || (char) character == ' ' || (char) character == ')' || (char) character == ','){
                         if (!buffer.isEmpty()) {
                             char firstChar = buffer.charAt(0);
-                            if(Character.isDigit(firstChar)){
+                            if(Character.isDigit(firstChar) || firstChar == 't' || firstChar == 'f'){
                                 writer.append("4,");
                                 writer.append(String.valueOf(value_count)).append(";");
-                                System.out.println("VALUE 4,"+value_count+" v:"+buffer);
+                                System.out.println("Значение 4,"+value_count+" v:"+buffer);
                                 buffer = new StringBuilder(convertValue(String.valueOf(buffer)));
                                 if(buffer.toString().equals("false_verification")){
                                     throw new CustomException("Неверно введеное число");
@@ -96,7 +96,7 @@ public class Lexer {
                             }else{
                                 writer.append("3,");
                                 writer.append(String.valueOf(ind_count)).append(";");
-                                System.out.println("VAR 3,"+ind_count+" v:"+buffer);
+                                System.out.println("Идентификатор 3,"+ind_count+" v:"+buffer);
                                 table_values.add(String.valueOf(buffer));
                                 ind_count++;
                             }
@@ -114,7 +114,7 @@ public class Lexer {
                     for (String delimiter : delimiters) {
 
                         if (String.valueOf(buffer).equals(delimiter)) {
-                            System.out.println("DELIMITER 2,"+index+" v:"+buffer);
+                            System.out.println("Разделитель 2,"+index+" v:"+buffer);
                             buffer = new StringBuilder();
                             writer.append("2,");
                             writer.append(String.valueOf(index)).append(";");
@@ -127,7 +127,7 @@ public class Lexer {
                     // Read of system words
                     for (String word : words) {
                         if (String.valueOf(buffer).equals(word)) {
-                            System.out.println("WORD 1,"+index+" v:"+buffer);
+                            System.out.println("Служ слово 1,"+index+" v:"+buffer);
                             buffer = new StringBuilder();
                             writer.append("1,");
                             writer.append(String.valueOf(index)).append(";");

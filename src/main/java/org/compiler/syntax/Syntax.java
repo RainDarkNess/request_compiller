@@ -31,6 +31,9 @@ public class Syntax {
     boolean programStart = false;
     boolean typeCheck = false;
     boolean assignVar = false;
+    boolean findVar = false;
+
+    Variable tmp_variable_for_operation = new Variable();
 
     // End.
     boolean hasEnd = false;
@@ -120,6 +123,8 @@ public class Syntax {
         for(String var: tmp_var_name) {
             for(Variable variable : variables){
                 if (Objects.equals(variable.name, String.valueOf(var))) {
+                    tmp_variable_for_operation = variable;
+                    findVar = true;
                     if(variable.init){
                         return;
                     }
@@ -152,12 +157,21 @@ public class Syntax {
             }
         }
         if(tableNum == 4){
+            if(tmp_var_name.size()>0){
+                if(!findVar)
+                    throw new CustomException("Ошибка! Переменная не существует " + tmp_var_name.get(0));
+            }
+            findVar = false;
             debug.show("Найдено значение в выражении " + writeMessageByBuffer(buffer));
             varOperation = true;
             hasOperator = false;
             return;
         }//                umn                     del                     &&                      add
         if(buffer.equals("2,7") || buffer.equals("2,8") || buffer.equals("2,9") || buffer.equals("2,24")){
+            if(!Objects.equals(tmp_variable_for_operation.type, "19") && buffer.equals("2,8")){
+                throw new CustomException("Ошибка! Деление на целочисленную переменную " + tmp_variable_for_operation.name);
+
+            }
             debug.show("Найден оператор действия над переменной " + writeMessageByBuffer(buffer));
             hasOperator = true;
             if(varOperation)
@@ -169,7 +183,7 @@ public class Syntax {
         throw new CustomException("Ошибка! Переменная не существует " + writeMessageByBuffer(buffer));
     }
 
-    public boolean varCheck(String buffer){
+    public boolean varCheck(String buffer) throws CustomException {
         debug.show("Провекра переменной " + tableForAll.get(1).get(Integer.parseInt(buffer.split(",")[1])));
         for(Variable variable: variables){
             if(variable.name.equals(tableForAll.get(1).get(Integer.parseInt(buffer.split(",")[1])))){
@@ -177,7 +191,7 @@ public class Syntax {
                 return variable.init;
             }
         }
-        return false;
+        throw new CustomException("Ошибка! Переменная не существует " + writeMessageByBuffer(buffer));
     }
     public String valueCheck(String buffer){
             String typeData = "18"; // int
