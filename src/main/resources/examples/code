@@ -1,6 +1,9 @@
 begin var
 int, int1, int2, int1111 #;
 
+/*
+    Многострочный комментарий
+*/
 
 int as 111;
 write int;
@@ -12,6 +15,7 @@ else{
     int as 12 add 1;
     write int;
 }
+
 
 while int LOWT 111 do{
     int as int add 1;

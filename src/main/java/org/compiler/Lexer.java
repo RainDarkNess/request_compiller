@@ -38,8 +38,47 @@ public class Lexer {
             String[] words = Lexer.words.split(" ");
             String[] delimiters = Lexer.delimiters.split(" ");
 
+            boolean comment_fist = false;
+            boolean comment_start = false;
+            boolean comment_pre_end = false;
+            boolean comment_end = false;
+
             while ((character = reader.read()) != -1) {
                 if(character != '\n' && character != '\t' && character != '\r') {
+
+                    if(character == '/'){
+                        if(comment_pre_end)
+                            comment_end = true;
+                        comment_fist = true;
+                        continue;
+                    }
+                    if(character == '*'){
+                        if(comment_start)
+                            comment_pre_end = true;
+
+                        if(comment_fist)
+                            comment_start = true;
+                        else
+                            throw new CustomException("Ошибка форматирования комментария отсуствует '/'");
+                        continue;
+                    }
+                    if(comment_end){
+                        comment_fist = false;
+                        comment_start = false;
+                        comment_pre_end = false;
+                        comment_end = false;
+                    }
+
+                    if(comment_pre_end)
+                        throw new CustomException("Ошибка форматирования комментария отсустсвует '/'");
+
+                    if(comment_start)
+                        continue;
+
+                    if(comment_fist)
+                        throw new CustomException("Ошибка форматирования комментария отсустсвует '*'");
+
+
 
                     if((char) character == ';' || (char) character == ' ' || (char) character == ')' || (char) character == ','){
                         if (!buffer.isEmpty()) {
