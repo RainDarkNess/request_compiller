@@ -35,6 +35,12 @@
 ```cmd
 gcc myobj.o -o myprog
 ```
+### how to update
+
+```cmd
+git fetch
+git pull
+```
 
 ### Зачем?
 Просто.
