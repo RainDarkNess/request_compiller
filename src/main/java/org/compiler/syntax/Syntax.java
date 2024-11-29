@@ -134,7 +134,11 @@ public class Syntax {
                         for(Variable _variable_ : variables){
                             if(Objects.equals(_variable_.name, var_tmp_name)){
                                 if(Objects.equals(variable.type, _variable_.type)){
-                                    variable.value = _variable_.value;
+                                    if(_variable_.init)
+                                        variable.value = _variable_.value;
+                                    else
+                                        throw new CustomException("Ошибка! Переменная не объявлена " +_variable_.name);
+
                                 }else{
                                     throw new CustomException("Ошибка! У переменных разные типы данных" +  variable.value + " и " +_variable_.value);
                                 }
@@ -157,7 +161,7 @@ public class Syntax {
             }
         }
         if(tableNum == 4){
-            if(tmp_var_name.size()>0){
+            if(!tmp_var_name.isEmpty()){
                 if(!findVar)
                     throw new CustomException("Ошибка! Переменная не существует " + tmp_var_name.get(0));
             }
@@ -272,7 +276,7 @@ public class Syntax {
     public void varCreate(String buffer){
         Variable variable = new Variable();
         variable.name = tableForAll.get(1).get(Integer.parseInt(buffer.split(",")[1])).toString();
-        variable.init = true;
+        variable.init = false;
         variable.value = "0";
         variable.type = "";
         variables.add(variable);
