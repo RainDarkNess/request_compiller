@@ -32,6 +32,7 @@ public class Syntax {
     boolean typeCheck = false;
     boolean assignVar = false;
     boolean findVar = false;
+    boolean isInt = false;
 
     Variable tmp_variable_for_operation = new Variable();
 
@@ -482,6 +483,11 @@ public class Syntax {
             } else if (Integer.parseInt(buffer.split(",")[0]) == 4) {
                 if(!varOperation){
                     debug.show("Идет операция с значением: " + writeMessageByBuffer(buffer));
+                    if(isInt){
+                        if(!Objects.equals(valueCheck((String) tableForAll.get(0).get(Integer.parseInt(buffer.split(",")[1]))), "18")){
+                            throw new CustomException("В модальном языке где объявлен только тип данных int используется float");
+                        }
+                    }
                     varOperation = true;
                 }else{
                     throw new CustomException("Отсуствие обязательного разделительного слова. Найдено: " + writeMessageByBuffer(buffer));
@@ -490,6 +496,9 @@ public class Syntax {
 
             //                            int                                 float                                 bool
             if(Objects.equals(buffer, "2,18") || Objects.equals(buffer, "2,19") || Objects.equals(buffer, "2,20")){
+                if(Objects.equals(buffer, "2,18")){
+                    isInt = true;
+                }
                 debug.show("Найден тип данных: " + delimiters[Integer.parseInt(buffer.split(",")[1])-1]);
                 typeCheck = true;
                 tmp_type = Integer.parseInt(buffer.split(",")[1]);

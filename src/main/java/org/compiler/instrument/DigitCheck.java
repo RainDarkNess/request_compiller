@@ -12,6 +12,7 @@ public class DigitCheck {
         boolean isHex = false;
         boolean isOct = false;
         boolean isBin = false;
+        boolean wasDot = false;
         boolean isDec = false;
         boolean valid = true;
         boolean isReal = false;
@@ -33,6 +34,11 @@ public class DigitCheck {
             if (currentChar == 'E' || currentChar == 'e') {
                 if (debug) System.out.println("Exponential read?");
                 exponentialWriteExp = true;
+                if(wasDot){
+                    return "false_verification";
+                }
+            }else{
+                wasDot = false;
             }
             if (currentChar == '+' || currentChar == '-') {
                 if (debug) System.out.println("Plus or Minus find...Exponential read.");
@@ -55,6 +61,7 @@ public class DigitCheck {
                         }
                     }
                     if (currentChar == '.') {
+                        wasDot = true;
                         if (isReal) {
                             System.err.println("Error. Find double dot");
                             return "false_verification";
@@ -108,7 +115,9 @@ public class DigitCheck {
             int answerInt = 0;
 
             char lastChar = value.charAt(value.length() - 1);
-
+            if(!Character.isDigit(lastChar) && lastChar != 'H' && lastChar != 'h' && lastChar != 'D' && lastChar != 'd' && lastChar != 'B' && lastChar != 'b' && lastChar != 'O' && lastChar != 'o'){
+                return "false_verification";
+            }
             if (lastChar == 'H' || lastChar == 'h') {
                 if (isReal) {
                     System.err.println("Error. hex cannot be real");
